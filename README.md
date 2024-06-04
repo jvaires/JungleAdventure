@@ -1,6 +1,6 @@
 # `<Jungle Adventure>`
 
-* Link do jogo: https://github.com/jvaires/JungleAdventureGame.git
+* Link do jogo: https://github.com/jvaires/JungleAdventure.git
 
 ## Motivação
 
