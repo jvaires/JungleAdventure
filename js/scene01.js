@@ -14,6 +14,8 @@ class Scene01 extends Phaser.Scene {
         this.load.image('menu', 'assets/menu.png');
         this.load.image('restart', 'assets/restart.png'); 
         this.load.image('gameOver', 'assets/gameOver.png'); 
+        this.load.audio('soundJump', 'sound/snd_jump.ogg')
+        this.load.audio('soundGetCoin', 'sound/snd_getcoin.ogg')
     }
 
     create() {
@@ -21,8 +23,6 @@ class Scene01 extends Phaser.Scene {
         this.scoreInterval = null;
         this.speedInterval = null;
         this.enemySpeed = 100;
-
-
 
         this.sky = this.add.image(0, 0, 'sky').setOrigin(0, 0);
         this.sky.displayWidth = 800;
@@ -50,7 +50,8 @@ class Scene01 extends Phaser.Scene {
         });
 
         this.control = this.input.keyboard.createCursorKeys();
-
+        
+        //this.soundJump = this.soundJump.add('soundJump')
         this.platforms = this.physics.add.staticGroup();
         const groundHeight = 20;
         this.chao = this.add.tileSprite(0, 600 - groundHeight, 800, groundHeight, 'chao');
@@ -66,7 +67,7 @@ class Scene01 extends Phaser.Scene {
         this.coin.body.checkCollision.down = false;
         this.physics.add.overlap(this.player, this.coin, this.collectCoin, null, this);
         this.physics.add.collider(this.player, this.enemy, this.gameOver, null, this);
-
+        
         this.tweens.add({
             targets: this.nuvem,
             x: -400,
@@ -83,6 +84,7 @@ class Scene01 extends Phaser.Scene {
             fontSize: '42px' });
         this.startScoreInterval();
         this.startSpeedInterval();
+
     }
 
     update() {
@@ -100,7 +102,7 @@ class Scene01 extends Phaser.Scene {
         }
 
         if (this.control.up.isDown && this.player.body.touching.down) {
-            this.player.setVelocityY(-550);
+            this.player.setVelocityY(-500);
         }
         if (this.control.down.isDown) {
             this.player.setVelocityY(500);
@@ -130,7 +132,7 @@ class Scene01 extends Phaser.Scene {
 
     collectCoin(player, coin) {
         this.resetCoinPosition();
-        this.score += 10;
+        this.score += 25;
         this.scoreText.setText('Score: ' + this.score);
     }
 
@@ -159,7 +161,7 @@ class Scene01 extends Phaser.Scene {
     startSpeedInterval() {
         this.speedInterval = setInterval(() => {
             this.enemySpeed += 50;
-        }, 20000);
+        }, 15000);
     }
 
     stopSpeedInterval() {
@@ -184,7 +186,6 @@ class Scene01 extends Phaser.Scene {
         this.physics.pause();
         this.input.keyboard.enabled = false;
         
-        // this.gameOver = this.add.image(400, 200, 'gameOver').setOrigin(0, 0)
         // Cria a tela de Game Over
         let gameOverText = this.add.text(400, 200, 'GAME OVER', { 
             fontFamily: '"Bungee Spice", sans-serif',
@@ -203,11 +204,6 @@ class Scene01 extends Phaser.Scene {
 
         let restartButton = this.add.image(300, 400, 'restart').setInteractive().setScale(0.5);
         let menuButton = this.add.image(500, 400, 'menu').setInteractive().setScale(0.5);
-
-        // let restartText = this.add.text(300, 400, 'Reiniciar', { fontSize: '24px', fill: '#fff' });
-        // restartText.setOrigin(0.5);
-        // let menuText = this.add.text(500, 400, 'Menu', { fontSize: '24px', fill: '#fff' });
-        // menuText.setOrigin(0.5);
 
         restartButton.on('pointerdown', () => {
             this.scene.restart();
