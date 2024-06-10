@@ -8,6 +8,7 @@ class MainMenu extends Phaser.Scene {
         this.load.image('playButton', 'assets/play.png'); // Substitua pelo caminho correto do botão de play
         this.load.image('title', 'assets/title.png');
         this.load.image('tutorialButton', 'assets/leader.png'); // Substitua pelo caminho correto do botão de tutorial
+        this.load.audio('backgroundMusic', 'sound/snd_musica.ogg'); // Carrega a música de fundo
     }
 
     create() {
@@ -30,6 +31,22 @@ class MainMenu extends Phaser.Scene {
         tutorialButton.on('pointerdown', () => {
             this.scene.start('Tutorial');
         });
+
+        // Toca a música de fundo
+        this.backgroundMusic = this.sound.add('backgroundMusic');
+
+        // Verifica se o áudio está carregado e pronto para tocar
+        if (this.backgroundMusic) {
+            console.log("Background music loaded successfully.");
+            this.backgroundMusic.play({ loop: true });
+        } else {
+            console.log("Failed to load background music.");
+        }
+    }
+
+    shutdown() {
+        // Para a música de fundo
+        this.backgroundMusic.stop();
     }
 }
 

@@ -1,7 +1,6 @@
 class Scene01 extends Phaser.Scene {
     constructor() {
         super('Scene01');
-        
     }
 
     preload() {
@@ -12,10 +11,10 @@ class Scene01 extends Phaser.Scene {
         this.load.image('nuvem', 'assets/nuvem.png');
         this.load.image('chao', 'assets/chao.png');
         this.load.image('menu', 'assets/menu.png');
-        this.load.image('restart', 'assets/restart.png'); 
-        this.load.image('gameOver', 'assets/gameOver.png'); 
-        this.load.audio('soundJump', 'sound/snd_jump.ogg')
-        this.load.audio('soundGetCoin', 'sound/snd_getcoin.ogg')
+        this.load.image('restart', 'assets/restart.png');
+        this.load.image('gameOver', 'assets/gameOver.png');
+        this.load.audio('soundJump', 'sound/snd_jump.ogg');
+        this.load.audio('soundGetCoin', 'sound/snd_getcoin.ogg');
     }
 
     create() {
@@ -28,17 +27,9 @@ class Scene01 extends Phaser.Scene {
         this.sky.displayWidth = 800;
         this.sky.displayHeight = 600;
 
-        this.player = this.physics.add.sprite(50, 50, 'player').setCollideWorldBounds(true);
-        this.player.canJump = true;
-
-        this.enemy = this.physics.add.sprite(800, 250, 'enemy')
-            .setOrigin(0, 0)
-            .setCollideWorldBounds(true)
-            .setScale(0.3)
-            .setVelocityX(-this.enemySpeed);
-
-        this.enemy.body.setSize(200, 170, false);
-        this.enemy.body.setOffset(150, 200);
+        this.createPlayer();
+        this.createEnemy();
+        this.createControls();
 
         this.nuvem = this.add.image(800, 100, 'nuvem').setOrigin(0, 0).setScale(0.3);
 
@@ -49,9 +40,6 @@ class Scene01 extends Phaser.Scene {
             repeat: -1
         });
 
-        this.control = this.input.keyboard.createCursorKeys();
-        
-        //this.soundJump = this.soundJump.add('soundJump')
         this.platforms = this.physics.add.staticGroup();
         const groundHeight = 20;
         this.chao = this.add.tileSprite(0, 600 - groundHeight, 800, groundHeight, 'chao');
@@ -67,7 +55,7 @@ class Scene01 extends Phaser.Scene {
         this.coin.body.checkCollision.down = false;
         this.physics.add.overlap(this.player, this.coin, this.collectCoin, null, this);
         this.physics.add.collider(this.player, this.enemy, this.gameOver, null, this);
-        
+
         this.tweens.add({
             targets: this.nuvem,
             x: -400,
@@ -79,12 +67,37 @@ class Scene01 extends Phaser.Scene {
             }
         });
 
-        this.scoreText = this.add.text(16, 16, 'Score: 0', { 
+        this.scoreText = this.add.text(16, 16, 'Score: 0', {
             fontFamily: '"Bungee Spice", sans-serif',
-            fontSize: '42px' });
+            fontSize: '42px'
+        });
+
+        // Carrega os sons
+        this.soundJump = this.sound.add('soundJump');
+        this.soundGetCoin = this.sound.add('soundGetCoin');
+
         this.startScoreInterval();
         this.startSpeedInterval();
+    }
 
+    createPlayer() {
+        this.player = this.physics.add.sprite(50, 50, 'player').setCollideWorldBounds(true);
+        this.player.canJump = true;
+    }
+
+    createEnemy() {
+        this.enemy = this.physics.add.sprite(800, 250, 'enemy')
+            .setOrigin(0, 0)
+            .setCollideWorldBounds(true)
+            .setScale(0.3)
+            .setVelocityX(-this.enemySpeed);
+
+        this.enemy.body.setSize(200, 170, false);
+        this.enemy.body.setOffset(150, 200);
+    }
+
+    createControls() {
+        this.control = this.input.keyboard.createCursorKeys();
     }
 
     update() {
@@ -103,6 +116,7 @@ class Scene01 extends Phaser.Scene {
 
         if (this.control.up.isDown && this.player.body.touching.down) {
             this.player.setVelocityY(-500);
+            this.soundJump.play(); // Toca o som de pulo
         }
         if (this.control.down.isDown) {
             this.player.setVelocityY(500);
@@ -124,7 +138,8 @@ class Scene01 extends Phaser.Scene {
     }
 
     resetCoinPosition() {
-        this.coin.x = Phaser.Math.Between(0, 800);
+        // Ajusta a posição da moeda para cair dentro do escopo nas laterais
+        this.coin.x = Phaser.Math.Between(100, 700);
         this.coin.y = 0;
         this.coin.body.setVelocityY(0);
         this.coin.body.setVelocityX(Phaser.Math.Between(-200, 200));
@@ -134,6 +149,7 @@ class Scene01 extends Phaser.Scene {
         this.resetCoinPosition();
         this.score += 25;
         this.scoreText.setText('Score: ' + this.score);
+        this.soundGetCoin.play(); // Toca o som de coleta de moeda
     }
 
     gameOver(player, enemy) {
@@ -142,6 +158,7 @@ class Scene01 extends Phaser.Scene {
         this.player.setVelocity(0, 0);
         this.enemy.setVelocity(0, 0);
         this.showGameOverScreen();
+        
     }
 
     startScoreInterval() {
@@ -171,31 +188,20 @@ class Scene01 extends Phaser.Scene {
         }
     }
 
-    shutdown() {
-        this.stopScoreInterval();
-        this.stopSpeedInterval();
-    }
-
-    destroy() {
-        this.stopScoreInterval();
-        this.stopSpeedInterval();
-    }
-
     showGameOverScreen() {
-        // Desabilita as colisões e a entrada do jogador
         this.physics.pause();
         this.input.keyboard.enabled = false;
-        
-        // Cria a tela de Game Over
-        let gameOverText = this.add.text(400, 200, 'GAME OVER', { 
+
+        let gameOverText = this.add.text(400, 200, 'GAME OVER', {
             fontFamily: '"Bungee Spice", sans-serif',
             fontSize: '64px',
-             fill: '#fff' });
+            fill: '#fff'
+        });
         gameOverText.setOrigin(0.5);
 
-        let scoreText = this.add.text(400, 300, 'Pontuação: ' + this.score, { 
+        let scoreText = this.add.text(400, 300, 'Pontuação: ' + this.score, {
             fontFamily: '"REM", sans-serif',
-            fontSize: '32px', 
+            fontSize: '32px',
             fill: '#fff',
             stroke: '#FF4D00',
             strokeThickness: 6
@@ -207,10 +213,14 @@ class Scene01 extends Phaser.Scene {
 
         restartButton.on('pointerdown', () => {
             this.scene.restart();
+            this.physics.resume();
+            this.input.keyboard.enabled = true;
         });
 
         menuButton.on('pointerdown', () => {
             this.scene.start('MainMenu');
+            this.physics.resume();
+            this.input.keyboard.enabled = true;
         });
     }
 }

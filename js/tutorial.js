@@ -15,7 +15,7 @@ class Tutorial extends Phaser.Scene {
 
         this.add.text(400, 100, 'Como Jogar?', {
             fontFamily: '"Bungee Spice", sans-serif',
-            fontSize: '32px',
+            fontSize: '64px',
             fill: '#fff',
             stroke: '#000',
             strokeThickness: 6

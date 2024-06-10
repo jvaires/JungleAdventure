@@ -1,3 +1,13 @@
-.cointainer{
-    text-align: center;
+/* style.css */
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #113a23 /* Cor de fundo opcional */
+}
+
+canvas {
+    border: 5px solid #fff; 
 }
